@@ -18,7 +18,11 @@ def get_file_content(working_directory: str, file_path: str) -> str:
                 return content
         else:
             return f'Error: File not found or is not a regular file: "{file_path}"'
+        
     except ValueError:
         return f'Error: Invalid file path: "{file_path}"'
+    
+    except Exception as e:
+        return f'Error: {str(e)}'
 
    

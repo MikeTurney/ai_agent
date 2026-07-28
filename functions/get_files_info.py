@@ -29,5 +29,9 @@ def get_files_info(working_directory: str, directory: str = ".") -> str:
 
         else:
             return f'Error: "{directory}" is not a directory'
+        
     except ValueError:
         return 'Error: Path contains both absolute and relative pathnames, paths are on different drives, or path is empty'
+    
+    except Exception as e:
+        return f'Error: {str(e)}'
