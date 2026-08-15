@@ -34,31 +34,45 @@ def main():
         },
     ]
 
-    response = client.chat.completions.create(
-        model="openrouter/free",
-        messages=messages,
-        tools=available_functions,
-        )
+    for _ in range(20):
 
-    message = response.choices[0].message
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            messages=messages,
+            tools=available_functions,
+            )
 
-    for tool_call in message.tool_calls:
-        result_message = call_function(tool_call, args.verbose)
-        if len(result_message["content"]) == 0:
-            raise Exception("Error: function returned no content")
-        else:
-            if args.verbose:
-                if response.usage is not None:
-                    print(f"Prompt tokens: {response.usage.prompt_tokens}")
-                    print(f"Response tokens: {response.usage.completion_tokens}")
+        message = response.choices[0].message
+        messages.append(message)
+
+
+        if message.tool_calls:
+
+            for tool_call in message.tool_calls:
+                result_message = call_function(tool_call, args.verbose)
+                messages.append(result_message)
+
+                if len(result_message["content"]) == 0:
+                    raise Exception("Error: function returned no content")
                 else:
-                    raise RuntimeError("Response usage is None. Something went wrong.")
+                    if args.verbose:
+                        if response.usage is not None:
+                            print(f"Prompt tokens: {response.usage.prompt_tokens}")
+                            print(f"Response tokens: {response.usage.completion_tokens}")
+                        else:
+                            raise RuntimeError("Response usage is None. Something went wrong.")
 
-                print(f'User prompt: {messages[1]["content"]}')
-                print(f'-> {result_message["content"]}')
-            else:
-                print(message.content)
+                        print(f'User prompt: {messages[1]["content"]}')
+                        print(f'-> {result_message["content"]}')
+
+        else:
+            return message.content
+
+    else:
+        print("Error: Hit max iterations")
+        raise SystemExit(1)
+
 
 
 if __name__ == "__main__":
-    main()
+    print(main())
